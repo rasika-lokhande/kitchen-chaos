@@ -249,8 +249,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76cf3e4b80361aa46b2e3e76fbe43d6a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  kitchenObjectSO: {fileID: 11400000, guid: 123e1a104899830469079977a71c4d2f, type: 2}
   counterTopPoint: {fileID: 7504029928473495490}
+  kitchenObjectSO: {fileID: 11400000, guid: a844acdacdd371f49b105d90843a386f, type: 2}
 --- !u!4 &7504029928473495490 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5653032612636308101, guid: a1e94238b0455a54ba23118cec567ba7, type: 3}

@@ -3,6 +3,7 @@ using System.Diagnostics.Eventing.Reader;
 using System.Drawing.Text;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using static UnityEngine.LightTransport.InputExtraction;
 
 public class Player : MonoBehaviour, IKitchenObjectParent {
     public static Player Instance { get; private set; }
@@ -39,35 +40,22 @@ public class Player : MonoBehaviour, IKitchenObjectParent {
 
     private void Start() {
         inputManager.OnInteraction += InputManager_OnInteraction;
+        inputManager.OnInteractAlternateAction += InputManager_OnInteractAlternateAction;
+    }
+
+    private void InputManager_OnInteractAlternateAction(object sender, EventArgs e) {
+        if (selectedCounter != null) {
+
+            selectedCounter.InteractAlternate(this);
+        }
     }
 
     private void InputManager_OnInteraction(object sender, EventArgs e) {
         //subscirbed to event OnInteraction
-
-        inputVector = inputManager.GetMovementVectorNormalized();
-        Vector3 movDir = new Vector3(inputVector.x, 0f, inputVector.y);
-
-        if (movDir.magnitude != 0f) {
-            lastInteractDir = movDir;
-        }
-
-        float interactDistance = 2f;
-
-        if (Physics.Raycast(transform.position, lastInteractDir, out RaycastHit raycastHit, interactDistance, countersLayerMask)) {
-            //Debug.Log(raycastHit.transform);
-            if (raycastHit.transform.TryGetComponent(out BaseCounter baseCounter)) {
-
-                baseCounter.Interact(this);
-                setSelectedCounter(baseCounter);
-
-            }
-            else {
-                //selectedCounter = null;
-                setSelectedCounter(null);
-            }
-        }
-        else {
-            setSelectedCounter(null);
+   
+        if (selectedCounter != null) {
+           
+            selectedCounter.Interact(this);
         }
     }
 
@@ -106,39 +94,40 @@ public class Player : MonoBehaviour, IKitchenObjectParent {
 
 
     private void HandleInteractions() {
-        inputVector = inputManager.GetMovementVectorNormalized();
-        Vector3 movDir = new Vector3(inputVector.x, 0f, inputVector.y);
+        Vector2 inputVector = inputManager.GetMovementVectorNormalized();
 
-        if (movDir.magnitude != 0f) {
-            lastInteractDir = movDir;
+        Vector3 moveDir = new Vector3(inputVector.x, 0f, inputVector.y);
+
+        if (moveDir != Vector3.zero) {
+            lastInteractDir = moveDir;
         }
 
         float interactDistance = 2f;
-
         if (Physics.Raycast(transform.position, lastInteractDir, out RaycastHit raycastHit, interactDistance, countersLayerMask)) {
-            //Debug.Log(raycastHit.transform);
-            if (raycastHit.transform.TryGetComponent(out ClearCounter clearCounter)) {
-
-
-                setSelectedCounter(clearCounter);
-
+            if (raycastHit.transform.TryGetComponent(out BaseCounter baseCounter)) {
+                // Has ClearCounter
+                if (baseCounter != selectedCounter) {
+                    SetSelectedCounter(baseCounter);
+                    //Debug.Log("selected couter set: " + baseCounter);
+                }
             }
             else {
+                SetSelectedCounter(null);
 
-                setSelectedCounter(null);
             }
         }
         else {
-            setSelectedCounter(null);
+            SetSelectedCounter(null);
         }
     }
 
-    private void setSelectedCounter(BaseCounter selectedCounter) {
+    private void SetSelectedCounter(BaseCounter selectedCounter) {
+        this.selectedCounter = selectedCounter;
 
-        OnSelectedCounterChange?.Invoke(this, new OnSelectedCounterChangeArgs { selectedCounter = selectedCounter });
-
+        OnSelectedCounterChange?.Invoke(this, new OnSelectedCounterChangeArgs {
+            selectedCounter = selectedCounter
+        });
     }
-
 
 
     public Transform GetKitchObjectFollowTransform() {
