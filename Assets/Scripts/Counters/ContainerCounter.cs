@@ -19,4 +19,9 @@ public class ContainerCounter : BaseCounter
         }
     }
 
+    public override void InteractAlternate(Player player) {
+
+
+    }
+
 }
